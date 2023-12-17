@@ -1,12 +1,12 @@
-import * as duckdb from "https://esm.sh/@duckdb/duckdb-wasm@1.28.0";
+import { getJsDelivrBundles, selectBundle, ConsoleLogger, AsyncDuckDB } from "https://esm.sh/@duckdb/duckdb-wasm@1.28.0";
 import { Int } from "https://esm.sh/v135/apache-arrow@13.0.0/type.js";
-const JSDELIVR_BUNDLES = duckdb.getJsDelivrBundles();
-const bundle = await duckdb.selectBundle(JSDELIVR_BUNDLES);
+const JSDELIVR_BUNDLES = getJsDelivrBundles();
+const bundle = await selectBundle(JSDELIVR_BUNDLES);
 const worker_url = new URL(bundle.mainWorker!, import.meta.url).href;
 
 const worker = new Worker(worker_url, { type: 'module' })
-const logger = new duckdb.ConsoleLogger();
-const db = new duckdb.AsyncDuckDB(logger, worker);
+const logger = new ConsoleLogger();
+const db = new AsyncDuckDB(logger, worker);
 await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
 URL.revokeObjectURL(worker_url);
 
