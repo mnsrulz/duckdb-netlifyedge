@@ -16,14 +16,11 @@ BigInt.prototype.toJSON = function () { return this.toString() }
 export default async function handler(req: Request, context: Context) {
     const conn = await db.connect();
     const arrowResult = await conn.query(`SELECT COUNT(*) AS total_count
-  FROM 'taxi_2019_04.parquet'
-  WHERE pickup_at BETWEEN '2019-04-15' AND '2019-04-20'`)
-    const stream = JSON.stringify(arrowResult.toArray().map((row) => row.toJSON()));
+                                            FROM 'taxi_2019_04.parquet'
+                                            WHERE pickup_at BETWEEN '2019-04-15' AND '2019-04-20'`)
+    const result = arrowResult.toArray().map((row) => row.toJSON());
 
-    return new Response(stream, {
-        status: 200,
-        headers: { "Content-Type": "text/html" },
-    });
+    return Response.json(result[0]);
 }
 
 export const config: Config = {
