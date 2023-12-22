@@ -15,29 +15,39 @@
 // BigInt.prototype.toJSON = function () { return this.toString() }
 
 // export default async function handler(req: Request, context: Context) {
-//     const conn = await db.connect();
-//     const arrowResult = await conn.query<{total_count: Int}>(`SELECT COUNT(*) AS total_count
-//                                             FROM 'taxi_2019_04.parquet'
-//                                             WHERE pickup_at BETWEEN '2019-04-15' AND '2019-04-20'`)
-//                                       //arrowResult.get(0)?.total_count      
-//     const result = arrowResult.toArray().map((row) => row.toJSON());
-//     return Response.json(result[0]);
-// }
-
-// export const config: Config = {
-//     path: "/duckdb",
-// };
-
-
+  //     const conn = await db.connect();
+  //     const arrowResult = await conn.query<{total_count: Int}>(`SELECT COUNT(*) AS total_count
+  //                                             FROM 'taxi_2019_04.parquet'
+  //                                             WHERE pickup_at BETWEEN '2019-04-15' AND '2019-04-20'`)
+  //                                       //arrowResult.get(0)?.total_count      
+  //     const result = arrowResult.toArray().map((row) => row.toJSON());
+  //     return Response.json(result[0]);
+  // }
+  
+  // export const config: Config = {
+    //     path: "/duckdb",
+    // };
+    
+import pl from "npm:nodejs-polars";
+const res = await fetch('https://github.com/mnsrulz/hpqdata/releases/download/v1.0/FY2023_Q4.parquet');
+const pq = pl.readParquet(await res.arrayBuffer());
 Deno.serve(async (req) => {
-    const worker = new Worker(
-        new URL("./worker.ts", import.meta.url).href,
-        {
-          type: "module",
-        },
-      );
+  const h = pq.head(5);
+
+  return new Response(JSON.stringify(h), {
+      status: 200,
+      headers: {
+        "content-type": "text/plain; charset=utf-8",
+      },
+    });
+    // const worker = new Worker(
+    //     new URL("./worker.ts", import.meta.url).href,
+    //     {
+    //       type: "module",
+    //     },
+    //   );
       
-      worker.postMessage({ filename: "./log.txt" });
+    //   worker.postMessage({ filename: "./log.txt" });
 
     // const conn = await db.connect();
     // const arrowResult = await conn.query<{total_count: Int}>(`SELECT COUNT(*) AS total_count
@@ -46,23 +56,23 @@ Deno.serve(async (req) => {
     //                                   //arrowResult.get(0)?.total_count      
     // const result = arrowResult.toArray().map((row) => row.toJSON());
     //return Response.json(result[0]);
-    console.log("Method:", req.method);
+    // console.log("Method:", req.method);
   
-    const url = new URL(req.url);
-    console.log("Path:", url.pathname);
-    console.log("Query parameters:", url.searchParams);
+    // const url = new URL(req.url);
+    // console.log("Path:", url.pathname);
+    // console.log("Query parameters:", url.searchParams);
   
-    console.log("Headers:", req.headers);
+    // console.log("Headers:", req.headers);
   
-    if (req.body) {
-      const body = await req.text();
-      console.log("Body:", body);
-    }
+    // if (req.body) {
+    //   const body = await req.text();
+    //   console.log("Body:", body);
+    // }
   
-    return new Response("Hello, world", {
-      status: 200,
-      headers: {
-        "content-type": "text/plain; charset=utf-8",
-      },
-    });
+    // return new Response("Hello, world", {
+    //   status: 200,
+    //   headers: {
+    //     "content-type": "text/plain; charset=utf-8",
+    //   },
+    // });
   });
