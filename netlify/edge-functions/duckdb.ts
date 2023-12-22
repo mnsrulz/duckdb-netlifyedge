@@ -28,7 +28,8 @@
     //     path: "/duckdb",
     // };
     
-import pl from "npm:nodejs-polars";
+//import pl from "npm:nodejs-polars";
+import pl from "https://esm.sh/nodejs-polars";
 const res = await fetch('https://github.com/mnsrulz/hpqdata/releases/download/v1.0/FY2023_Q4.parquet');
 const pq = pl.readParquet(await res.arrayBuffer());
 Deno.serve(async (req) => {
