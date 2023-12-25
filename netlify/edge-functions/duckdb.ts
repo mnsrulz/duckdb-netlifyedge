@@ -32,20 +32,20 @@
 //import pl from "https://esm.sh/nodejs-polars";
 // @deno-types="https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/dist/duckdb-node-blocking.d.ts"
 //import { createDuckDB, getJsDelivrBundles, ConsoleLogger, NODE_RUNTIME } from 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/dist/duckdb-node-blocking.cjs';
-import { createDuckDB, getJsDelivrBundles, ConsoleLogger, NODE_RUNTIME } from 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/dist/duckdb-node-blocking.cjs/+esm';
+import { createDuckDB, getJsDelivrBundles, ConsoleLogger, DEFAULT_RUNTIME } from 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/dist/duckdb-browser-blocking.mjs/+esm';
 
 const logger = new ConsoleLogger();
 const JSDELIVR_BUNDLES = getJsDelivrBundles();
-const ddb = await createDuckDB(JSDELIVR_BUNDLES, logger, NODE_RUNTIME);
+const ddb = await createDuckDB(JSDELIVR_BUNDLES, logger, DEFAULT_RUNTIME);
 await ddb.instantiate();
 
 const res = await fetch('https://github.com/cwida/duckdb-data/releases/download/v1.0/taxi_2019_04.parquet');
-await ddb.registerFileBuffer('taxi_2019_04.parquet', new Uint8Array(await res.arrayBuffer()));
+ddb.registerFileBuffer('taxi_2019_04.parquet', new Uint8Array(await res.arrayBuffer()));
 
 Deno.serve(async (req) => {
 
       const conn = await ddb.connect();
-      const arrowResult = await conn.query<{total_count: number}>(`SELECT COUNT(*) AS total_count
+      const arrowResult = await conn.query(`SELECT COUNT(*) AS total_count
                                               FROM 'taxi_2019_04.parquet'
                                               WHERE pickup_at BETWEEN '2019-04-15' AND '2019-04-20'`)
                                         //arrowResult.get(0)?.total_count      
