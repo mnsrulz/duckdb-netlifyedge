@@ -46,9 +46,11 @@ router
     WHERE 1=1
     ${statusQuery || ''}
     --ORDER BY RECEIVED_DATE DESC
+    `
+    const arrowResult = conn.query(`SELECT * ${baseQuey}
     LIMIT ${pageSize}
-    OFFSET ${offset}`
-    const arrowResult = conn.query(`SELECT * ${baseQuey}`);
+    OFFSET ${offset}
+    `);
     const countResult = conn.query(`SELECT COUNT(*) AS total_count ${baseQuey}`);
     context.response.body = {
       count: countResult.toArray().map((row: any) => row.toJSON()),
