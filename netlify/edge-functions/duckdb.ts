@@ -52,9 +52,13 @@ router
     context.response.body = arrowResult.toArray().map((row: any) => row.toJSON());
   })
   .get("/attributes/:attr", (context) => {
-    const {attr} = getQuery(context, { mergeParams: true });
+    const {attr, q} = getQuery(context, { mergeParams: true });
+    const filter = q && `AND %{attr} ILIKE '%${q}%'`;
     const arrowResult = conn.query(`SELECT DISTINCT ${attr} AS name
                                               FROM 'db.parquet'
+                                              WHERE 1=1
+                                              ${filter || ''}
+                                              LIMIT 100
                                               `);
     context.response.body = arrowResult.toArray().map((row: any) => row.toJSON());
   })
