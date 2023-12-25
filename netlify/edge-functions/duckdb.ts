@@ -1,27 +1,23 @@
-import { getJsDelivrBundles, selectBundle, ConsoleLogger, AsyncDuckDB } from "https://esm.sh/@duckdb/duckdb-wasm@1.28.0";
-import { Int } from "https://esm.sh/v135/apache-arrow@13.0.0/type.js";
-const JSDELIVR_BUNDLES = getJsDelivrBundles();
-const bundle = await selectBundle(JSDELIVR_BUNDLES);
-const worker_url = new URL(bundle.mainWorker!, import.meta.url).href;
-
-const worker = new Worker(worker_url, { type: 'module' })
+import { Application, Router } from "https://deno.land/x/oak@v12.6.1/mod.ts";
+// @deno-types="./duckdb.types.ts"
+import { createDuckDB, getJsDelivrBundles, ConsoleLogger, DEFAULT_RUNTIME, DuckDBBindings, DuckDBConnection } from 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/dist/duckdb-browser-blocking.mjs/+esm';
+import { getQuery } from "https://deno.land/x/oak@v12.6.1/helpers.ts";
 const logger = new ConsoleLogger();
-const db = new AsyncDuckDB(logger, worker);
-await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
-URL.revokeObjectURL(worker_url);
+const JSDELIVR_BUNDLES = getJsDelivrBundles();
+const ddb: DuckDBBindings = await createDuckDB(JSDELIVR_BUNDLES, logger, DEFAULT_RUNTIME);
 
-const res = await fetch('https://github.com/cwida/duckdb-data/releases/download/v1.0/taxi_2019_04.parquet');
-await db.registerFileBuffer('taxi_2019_04.parquet', new Uint8Array(await res.arrayBuffer()));
-BigInt.prototype.toJSON = function () { return this.toString() }
+await ddb.instantiate(() => { });
+
+const res = await fetch('https://github.com/mnsrulz/hpqdata/releases/download/v1.0/db.parquet');
+ddb.registerFileBuffer('db.parquet', new Uint8Array(await res.arrayBuffer()));
+const conn: DuckDBConnection = ddb.connect();
 
 export default async function handler(req: Request, context: Context) {
-    const conn = await db.connect();
-    const arrowResult = await conn.query<{total_count: Int}>(`SELECT COUNT(*) AS total_count
-                                            FROM 'taxi_2019_04.parquet'
-                                            WHERE pickup_at BETWEEN '2019-04-15' AND '2019-04-20'`)
-                                      //arrowResult.get(0)?.total_count      
-    const result = arrowResult.toArray().map((row) => row.toJSON());
-    return Response.json(result[0]);
+    const arrowResult = conn.query<{total_count: number}>(`SELECT COUNT(*) AS total_count
+                                              FROM 'db.parquet'
+                                              `);
+    const result = arrowResult.toArray().map((row: any) => row.toJSON());
+    return Response.json(result);
 }
 
 export const config: Config = {
