@@ -39,15 +39,17 @@ const JSDELIVR_BUNDLES = getJsDelivrBundles();
 const ddb = await createDuckDB(JSDELIVR_BUNDLES, logger, DEFAULT_RUNTIME);
 await ddb.instantiate();
 
-const res = await fetch('https://github.com/cwida/duckdb-data/releases/download/v1.0/taxi_2019_04.parquet');
-ddb.registerFileBuffer('taxi_2019_04.parquet', new Uint8Array(await res.arrayBuffer()));
+//const res = await fetch('https://github.com/cwida/duckdb-data/releases/download/v1.0/taxi_2019_04.parquet');
+const res = await fetch('https://github.com/mnsrulz/hpqdata/releases/download/v1.0/db.parquet');
+ddb.registerFileBuffer('db.parquet', new Uint8Array(await res.arrayBuffer()));
 
 Deno.serve(async (req) => {
 
       const conn = await ddb.connect();
       const arrowResult = await conn.query(`SELECT COUNT(*) AS total_count
-                                              FROM 'taxi_2019_04.parquet'
-                                              WHERE pickup_at BETWEEN '2019-04-15' AND '2019-04-20'`)
+                                              FROM 'db.parquet'
+                                              --WHERE pickup_at BETWEEN '2019-04-15' AND '2019-04-20'
+                                              `)
                                         //arrowResult.get(0)?.total_count      
       const result = arrowResult.toArray().map((row:any) => row.toJSON());
       return Response.json(result[0]);
