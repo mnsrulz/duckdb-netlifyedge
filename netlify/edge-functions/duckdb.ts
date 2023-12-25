@@ -1,6 +1,7 @@
 import { Application, Router } from "https://deno.land/x/oak@v12.6.1/mod.ts";
 // @deno-types="./duckdb.types.ts"
 import { createDuckDB, getJsDelivrBundles, ConsoleLogger, DEFAULT_RUNTIME, DuckDBBindings, DuckDBConnection } from 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/dist/duckdb-browser-blocking.mjs/+esm';
+import { getQuery } from "https://deno.land/x/oak@v12.6.1/helpers.ts";
 const logger = new ConsoleLogger();
 const JSDELIVR_BUNDLES = getJsDelivrBundles();
 const ddb: DuckDBBindings = await createDuckDB(JSDELIVR_BUNDLES, logger, DEFAULT_RUNTIME);
@@ -19,7 +20,7 @@ const conn: DuckDBConnection = ddb.connect();
 //   const result = arrowResult.toArray().map((row: any) => row.toJSON());
 //   return Response.json(result[0]);
 // });
-
+declare type DataQuery = {page: number, page_size: number, status: string, start_date: string, end_date: string}
 const router = new Router();
 router
   .get("/counts", (context) => {
@@ -33,6 +34,20 @@ router
     const arrowResult = conn.query<{total_count: number}>(`SELECT COUNT(*) AS total_count
                                               FROM 'db.parquet'
                                               WHERE CASE_STATUS = 'Approved'
+                                              `);
+    context.response.body = arrowResult.toArray().map((row: any) => row.toJSON());
+  })
+  .get("/data", (context) => {
+    const qu:any = getQuery(context) as unknown;
+    const statusQuery = qu.status && `AND CASE_STATUS = '${qu.status}'`;
+    const pageSize = Math.min(qu.page_size || 100);
+    const offset = ((qu.page || 1) - 1) * pageSize;
+    const arrowResult = conn.query(`SELECT * AS total_count
+                                              FROM 'db.parquet'
+                                              WHERE 1=1
+                                              ${statusQuery}
+                                              LIMIT ${pageSize}
+                                              OFFSET ${offset}
                                               `);
     context.response.body = arrowResult.toArray().map((row: any) => row.toJSON());
   })
