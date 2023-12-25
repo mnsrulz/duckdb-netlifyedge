@@ -53,7 +53,7 @@ router
   })
   .get("/attributes/:attr", (context) => {
     const {attr, q} = getQuery(context, { mergeParams: true });
-    const filter = q && `AND %{attr} ILIKE '%${q}%'`;
+    const filter = q && `AND ${attr} ILIKE '%${q}%'`;
     const arrowResult = conn.query(`SELECT DISTINCT ${attr} AS name
                                               FROM 'db.parquet'
                                               WHERE 1=1
