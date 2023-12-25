@@ -5,6 +5,10 @@ export default function handler(req: Request) {
     const arrowResult = conn.query(q);
     return Response.json({
         total_count: arrowResult.get(0)?.total_count
+    }, {
+        headers: {
+            'Access-Control-Allow-Origin': '*'
+        }
     });
 }
 

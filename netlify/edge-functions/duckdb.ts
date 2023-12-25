@@ -4,6 +4,10 @@ export default function handler() {
     const arrowResult = conn.query<{ total_count: Int32 }>(`SELECT COUNT(*) AS total_count FROM 'db.parquet'`);
     return Response.json({
         total_count: arrowResult.get(0)?.total_count
+    }, {
+        headers: {
+            'Access-Control-Allow-Origin': '*'
+        }
     });
 }
 
