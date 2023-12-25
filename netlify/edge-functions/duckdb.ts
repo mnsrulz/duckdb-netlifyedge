@@ -42,15 +42,18 @@ router
     const statusQuery = qu.status && `AND CASE_STATUS = '${qu.status}'`;
     const pageSize = Math.min(qu.page_size || 100);
     const offset = ((qu.page || 1) - 1) * pageSize;
-    const arrowResult = conn.query(`SELECT * AS total_count
-                                              FROM 'db.parquet'
-                                              WHERE 1=1
-                                              ${statusQuery || ''}
-                                              --ORDER BY RECEIVED_DATE DESC
-                                              LIMIT ${pageSize}
-                                              OFFSET ${offset}
-                                              `);
-    context.response.body = arrowResult.toArray().map((row: any) => row.toJSON());
+    const baseQuey = `FROM 'db.parquet'
+    WHERE 1=1
+    ${statusQuery || ''}
+    --ORDER BY RECEIVED_DATE DESC
+    LIMIT ${pageSize}
+    OFFSET ${offset}`
+    const arrowResult = conn.query(`SELECT * ${baseQuey}`);
+    const countResult = conn.query(`SELECT COUNT(*) AS total_count ${baseQuey}`);
+    context.response.body = {
+      count: countResult.toArray().map((row: any) => row.toJSON())[0].total_count,
+      data: arrowResult.toArray().map((row: any) => row.toJSON())
+    };
   })
   .get("/attributes/:attr", (context) => {
     const {attr, q} = getQuery(context, { mergeParams: true });
