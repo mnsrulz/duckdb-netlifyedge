@@ -45,7 +45,7 @@ router
     const arrowResult = conn.query(`SELECT * AS total_count
                                               FROM 'db.parquet'
                                               WHERE 1=1
-                                              ${statusQuery}
+                                              ${statusQuery || ''}
                                               LIMIT ${pageSize}
                                               OFFSET ${offset}
                                               `);
