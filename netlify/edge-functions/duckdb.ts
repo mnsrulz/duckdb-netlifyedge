@@ -29,18 +29,34 @@
     // };
     
 //import pl from "npm:nodejs-polars";
-import pl from "https://esm.sh/nodejs-polars";
-const res = await fetch('https://github.com/mnsrulz/hpqdata/releases/download/v1.0/FY2023_Q4.parquet');
-const pq = pl.readParquet(await res.arrayBuffer());
-Deno.serve(async (req) => {
-  const h = pq.head(5);
+//import pl from "https://esm.sh/nodejs-polars";
+// @deno-types="https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/dist/duckdb-node-blocking.d.ts"
+import { createDuckDB, getJsDelivrBundles, ConsoleLogger, NODE_RUNTIME } from 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/dist/duckdb-node-blocking.cjs';
 
-  return new Response(JSON.stringify(h), {
-      status: 200,
-      headers: {
-        "content-type": "text/plain; charset=utf-8",
-      },
-    });
+const logger = new ConsoleLogger();
+const JSDELIVR_BUNDLES = getJsDelivrBundles();
+const ddb = await createDuckDB(JSDELIVR_BUNDLES, logger, NODE_RUNTIME);
+await ddb.instantiate();
+
+const res = await fetch('https://github.com/cwida/duckdb-data/releases/download/v1.0/taxi_2019_04.parquet');
+await ddb.registerFileBuffer('taxi_2019_04.parquet', new Uint8Array(await res.arrayBuffer()));
+
+Deno.serve(async (req) => {
+
+      const conn = await ddb.connect();
+      const arrowResult = await conn.query<{total_count: number}>(`SELECT COUNT(*) AS total_count
+                                              FROM 'taxi_2019_04.parquet'
+                                              WHERE pickup_at BETWEEN '2019-04-15' AND '2019-04-20'`)
+                                        //arrowResult.get(0)?.total_count      
+      const result = arrowResult.toArray().map((row:any) => row.toJSON());
+      return Response.json(result[0]);
+
+  // return new Response(JSON.stringify(h), {
+  //     status: 200,
+  //     headers: {
+  //       "content-type": "text/plain; charset=utf-8",
+  //     },
+  //   });
     // const worker = new Worker(
     //     new URL("./worker.ts", import.meta.url).href,
     //     {
