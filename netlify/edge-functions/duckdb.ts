@@ -46,6 +46,7 @@ router
                                               FROM 'db.parquet'
                                               WHERE 1=1
                                               ${statusQuery || ''}
+                                              ORDER BY RECEIVED_DATE DESC
                                               LIMIT ${pageSize}
                                               OFFSET ${offset}
                                               `);
