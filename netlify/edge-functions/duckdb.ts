@@ -51,6 +51,13 @@ router
                                               `);
     context.response.body = arrowResult.toArray().map((row: any) => row.toJSON());
   })
+  .get("/attributes/:attr", (context) => {
+    const {attr} = getQuery(context, { mergeParams: true });
+    const arrowResult = conn.query(`SELECT DISTINCT ${attr} AS name
+                                              FROM 'db.parquet'
+                                              `);
+    context.response.body = arrowResult.toArray().map((row: any) => row.toJSON());
+  })
   .get("/pastYearCounts", (context) => {
     const arrowResult = conn.query<{total_count: number}>(`SELECT COUNT(*) AS total_count
                                               FROM 'db.parquet'
