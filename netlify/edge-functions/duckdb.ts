@@ -51,7 +51,7 @@ router
     const arrowResult = conn.query(`SELECT * ${baseQuey}`);
     const countResult = conn.query(`SELECT COUNT(*) AS total_count ${baseQuey}`);
     context.response.body = {
-      count: countResult.toArray().map((row: any) => row.toJSON())[0].total_count,
+      count: countResult.toArray().map((row: any) => row.toJSON()),
       data: arrowResult.toArray().map((row: any) => row.toJSON())
     };
   })
