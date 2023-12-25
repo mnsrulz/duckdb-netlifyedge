@@ -1,5 +1,0 @@
-export * from 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/dist/types/src/platform.d.ts'
-export * from 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/dist/types/src/targets/duckdb-browser-blocking.d.ts'
-export * from 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/dist/types/src/log.d.ts'
-export * from 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/dist/types/src/bindings/bindings_interface.d.ts'
-export * from 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/dist/types/src/bindings/connection.d.ts'
