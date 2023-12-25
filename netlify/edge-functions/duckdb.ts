@@ -53,7 +53,7 @@ router
     `);
     const countResult = conn.query(`SELECT COUNT(*) AS total_count ${baseQuey}`);
     context.response.body = {
-      count: countResult.toArray().map((row: any) => row.toJSON()),
+      count: countResult.toArray().map((row: any) => row.toJSON())[0].total_count,
       data: arrowResult.toArray().map((row: any) => row.toJSON())
     };
   })
