@@ -1,4 +1,4 @@
 # duckdb-netlifyedge
 A sample showcasing duckdb querying parquet file in netlify edge
 
-Currently **NOT WORKING** when deployed to netlify, but working with ```netlify dev``` command locally.
+Currently querying **remote** file is not supported.
