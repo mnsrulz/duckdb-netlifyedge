@@ -1,5 +1,6 @@
 import { conn } from '../../services/db.ts'
-BigInt.prototype.toJSON = function() { return this.toString() }
+//BigInt.prototype.toJSON = function() { return this.toString() }
+BigInt.prototype.toJSON = function() { return Number(this); }    //to keep them as numbers. Numbers have good range.
 export default function handler(req: Request) {
     try {
         const q = new URL(req.url).searchParams.get('q');
