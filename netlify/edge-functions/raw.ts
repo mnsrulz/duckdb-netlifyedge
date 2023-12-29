@@ -1,14 +1,25 @@
 import { conn } from '../../services/db.ts'
-import { md5 } from 'hash-wasm';
-//BigInt.prototype.toJSON = function() { return this.toString() }
-BigInt.prototype.toJSON = function() { return Number(this); }    //to keep them as numbers. Numbers have good range.
+//import { md5 } from 'hash-wasm';
+
+BigInt.prototype.toJSON = function() { 
+    return Number(this); 
+}    //to keep them as numbers. Numbers have good range.
 const map = new Map<string, object>();
-const instanceId = crypto.randomUUID()
+const instanceId = crypto.randomUUID();
+const md5 = (str) => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash &= hash; // Convert to 32bit integer
+    }
+    return new Uint32Array([hash])[0].toString(36);
+};
 export default async function handler(req: Request) {
     try {
         const q = new URL(req.url).searchParams.get('q');
         if(!q) throw new Error(`empty query provided. Use with ?q=YOUR_QUERY`)
-        const qmd5 = await md5(q);
+        const qmd5 = md5(q);
         if (map.get(qmd5)) return Response.json(map.get(qmd5), {
           headers: {
             'Access-Control-Allow-Origin': '*',
