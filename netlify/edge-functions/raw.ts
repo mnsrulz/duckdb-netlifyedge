@@ -20,7 +20,8 @@ export default async function handler(req: Request) {
         const q = new URL(req.url).searchParams.get('q');
         if(!q) throw new Error(`empty query provided. Use with ?q=YOUR_QUERY`)
         const qmd5 = md5(q);
-        if (map.get(qmd5)) return Response.json(map.get(qmd5), {
+    
+        if (map.has(qmd5)) return Response.json(map.get(qmd5), {
           headers: {
             'Access-Control-Allow-Origin': '*',
             'x-read-from': 'cache-map',
